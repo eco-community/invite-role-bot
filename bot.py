@@ -7,11 +7,13 @@ import logging
 # initialize bot params
 intents = discord.Intents.default()
 intents.members = True
-bot = commands.Bot(command_prefix="$invites.", intents=intents)
+bot = commands.Bot(command_prefix="$invites.",
+                   help_command=None, intents=intents)
 
 # setup logger
 logging.basicConfig(filename="eco-memes.log", level=logging.DEBUG,
                     format="%(asctime)s %(levelname)s:%(message)s")
+bot.remove_command(help)
 
 
 async def get_sorted_invites(ctx):
@@ -31,7 +33,7 @@ def widget_builder(invites, all=False):
     widget.set_author(name=bot.user.name)
     widget.set_thumbnail(
         url="https://pbs.twimg.com/profile_images/1366064859574661124/Ocl4oSnU_400x400.jpg")  # TODO fix to .png
-    widget.set_footer(text="FooterText")
+    # widget.set_footer(text="FooterText")
     for i in invites:
         if i.uses == 0 and all == False:
             continue
@@ -54,6 +56,22 @@ async def get_all_invitations_stats(ctx):
 async def get_invitations_stats(ctx):
     invites = await get_sorted_invites(ctx)
     widget = widget_builder(invites)
+    await ctx.send(embed=widget)
+
+
+@bot.command('help')
+async def help(ctx):
+    widget = Embed(description="Available commands for Invite-Role-Bot", color=0x03d692,
+                   title="Help")
+    widget.set_thumbnail(
+        url="https://pbs.twimg.com/profile_images/1366064859574661124/Ocl4oSnU_400x400.jpg")  # TODO fix to .png
+    widget.add_field(
+        name="$invites.stats_all",
+        value=f"`Displays a list of all invitation links`\n", inline=False)
+    widget.add_field(
+        name="$invites.stats_uses",
+        value="`Displays a list of all invitation links with uses > 0`", inline=False
+    )
     await ctx.send(embed=widget)
 
 
