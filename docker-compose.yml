@@ -1,0 +1,23 @@
+---
+version: "3.8"
+
+services:
+  redis:
+    image: 'redis:6.0.6'
+    ports:
+      - '127.0.0.1:6379:6379/tcp'
+    volumes:
+      - 'redis_data:/data:rw'
+    healthcheck:
+      test: redis-cli ping
+      interval: 3s
+      timeout: 5s
+      retries: 5
+
+  # redisinsight:
+  #   image: 'redislabs/redisinsight:latest'
+  #   ports:
+  #     - '127.0.0.1:8001:8001'
+
+volumes:
+  redis_data: {}
