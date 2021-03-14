@@ -1,0 +1,4 @@
+TOKEN = ""
+SENTRY_API_KEY = ""
+LOG_CHANNEL_ID = 42
+REDIS_HOST_URL = "redis://localhost:6379/0"
