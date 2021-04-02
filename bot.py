@@ -9,7 +9,7 @@ from sentry_sdk.integrations.aiohttp import AioHttpIntegration
 
 import config
 from constants import SENTRY_ENV_NAME, ROLES_CAN_CONTROL_BOT, INV_TO_ROLES, ROLE_ID_SEPARATOR, GUILD_INDEX
-from utils import use_sentry, find_delta
+from utils import use_sentry, find_delta, convert_links_to_str
 
 
 # initialize bot params
@@ -105,12 +105,7 @@ async def connect_invite_to_role(ctx, url: str = None, *roles):
 @commands.has_any_role(*ROLES_CAN_CONTROL_BOT)
 @bot.command("disconnect")
 async def disconnect_invite_from_role(ctx, url: str = None):
-    invites = await get_sorted_invites(ctx)
-    invites_urls = [_.url for _ in invites]
     if url:
-        # validate url
-        if url not in invites_urls:
-            return await ctx.send("Invite url isn't valid")
         await bot.redis_client.hdel(INV_TO_ROLES, url)
         await ctx.send(f"Removed <{url}> invite")
     else:
@@ -204,9 +199,8 @@ async def process_queue():
                 await member.add_roles(*roles_to_assign)
             else:
                 logging.debug(f"user ({member.mention}) on_join_unsure1 {[*delta.used]} | {delta.removed}")
-                await log_channel.send(
-                    f"Unsure about {member.mention}, possible invites: {[*delta.used]} | {delta.removed}"
-                )
+                links_str = f"{convert_links_to_str([*delta.used])} | {convert_links_to_str(delta.removed)}"
+                await log_channel.send(f"Unsure about {member.mention}, possible invites: {links_str}")
         elif delta.removed:
             # Not 100%, but close enough
             if len(delta.removed) == 1:
@@ -216,7 +210,9 @@ async def process_queue():
                 await member.add_roles(*roles_to_assign)
             else:
                 logging.debug(f"user ({member.mention}) on_join_unsure2 {delta.removed}")
-                await log_channel.send(f"Unsure about {member.mention}, possible invites: {delta.removed}")
+                await log_channel.send(
+                    f"Unsure about {member.mention}, possible invites: {convert_links_to_str(delta.removed)}"
+                )
         else:
             logging.debug(f"user ({member.mention}) on_join_unsure3")
             await log_channel.send(

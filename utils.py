@@ -50,3 +50,10 @@ def find_delta(before: Dict[str, int], after: Dict[str, int]) -> Delta:
             used[url] = uses
 
     return Delta(removed=removed, used=used)
+
+
+def convert_links_to_str(links: List[str]) -> str:
+    return_str = ""
+    for link in links:
+        return_str += f"<{link}> "
+    return return_str
