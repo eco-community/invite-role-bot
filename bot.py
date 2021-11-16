@@ -8,7 +8,7 @@ from discord import Member, Embed, Intents, Role, Invite
 from sentry_sdk.integrations.aiohttp import AioHttpIntegration
 
 import config
-from constants import SENTRY_ENV_NAME, ROLES_CAN_CONTROL_BOT, INV_TO_ROLES, ROLE_ID_SEPARATOR, GUILD_INDEX
+from constants import SENTRY_ENV_NAME, INV_TO_ROLES, ROLE_ID_SEPARATOR, GUILD_INDEX
 from utils import use_sentry, find_delta, convert_links_to_str
 
 
@@ -27,7 +27,7 @@ use_sentry(
 )
 
 # setup logger
-logging.basicConfig(filename="eco-invites.log", level=logging.INFO, format="%(asctime)s %(levelname)s:%(message)s")
+logging.basicConfig(filename="invites.log", level=logging.INFO, format="%(asctime)s %(levelname)s:%(message)s")
 bot.remove_command(help)
 
 
@@ -51,7 +51,7 @@ def widget_builder(invites, display_all=False):
     description_uses = "Statistics for URLs which were used at least once"
     description = description_all if display_all else description_uses
     widget = Embed(description=description, color=0x03D692, title="Invitations Stats")
-    widget.set_thumbnail(url="https://eco-bots.s3.eu-north-1.amazonaws.com/eco_large.png")
+    widget.set_thumbnail(url=config.PROJECT_THUMBNAIL)
     for i in invites:
         if i.uses == 0 and not display_all:
             continue
@@ -61,12 +61,12 @@ def widget_builder(invites, display_all=False):
     return widget
 
 
-@commands.has_any_role(*ROLES_CAN_CONTROL_BOT)
+@commands.has_any_role(*config.ROLES_CAN_CONTROL_BOT)
 @bot.command("list")
 async def get_all_invites_with_roles(ctx):
     invites_to_roles = await bot.redis_client.hgetall(INV_TO_ROLES, encoding="utf-8")
     widget = Embed(description="List all connected invite URLs and roles", color=0x03D692, title="Invite-Roles list")
-    widget.set_thumbnail(url="https://eco-bots.s3.eu-north-1.amazonaws.com/eco_large.png")
+    widget.set_thumbnail(url=config.PROJECT_THUMBNAIL)
     for k, v in invites_to_roles.items():
         widget.add_field(name=f"<{k}>", value=" ".join(f"<@&{_}>" for _ in v.split(ROLE_ID_SEPARATOR)), inline=False)
     # if there are no invites display help message
@@ -79,7 +79,7 @@ async def get_all_invites_with_roles(ctx):
     await ctx.send(embed=widget)
 
 
-@commands.has_any_role(*ROLES_CAN_CONTROL_BOT)
+@commands.has_any_role(*config.ROLES_CAN_CONTROL_BOT)
 @bot.command("connect")
 async def connect_invite_to_role(ctx, url: str = None, *roles):
     invites = await get_sorted_invites(ctx)
@@ -102,7 +102,7 @@ async def connect_invite_to_role(ctx, url: str = None, *roles):
     await ctx.send(f"Users that will use <{url}> will be {' '.join(roles)}")
 
 
-@commands.has_any_role(*ROLES_CAN_CONTROL_BOT)
+@commands.has_any_role(*config.ROLES_CAN_CONTROL_BOT)
 @bot.command("disconnect")
 async def disconnect_invite_from_role(ctx, url: str = None):
     if url:
@@ -112,7 +112,7 @@ async def disconnect_invite_from_role(ctx, url: str = None):
         await ctx.send("Wrong syntax, `$invites.disconnect URL`")
 
 
-@commands.has_any_role(*ROLES_CAN_CONTROL_BOT)
+@commands.has_any_role(*config.ROLES_CAN_CONTROL_BOT)
 @bot.command("stats_all")
 async def get_all_invitations_stats(ctx):
     invites = await get_sorted_invites(ctx)
@@ -120,7 +120,7 @@ async def get_all_invitations_stats(ctx):
     await ctx.send(embed=widget)
 
 
-@commands.has_any_role(*ROLES_CAN_CONTROL_BOT)
+@commands.has_any_role(*config.ROLES_CAN_CONTROL_BOT)
 @bot.command("stats_used")
 async def get_invitations_stats(ctx):
     invites = await get_sorted_invites(ctx)
@@ -128,11 +128,11 @@ async def get_invitations_stats(ctx):
     await ctx.send(embed=widget)
 
 
-@commands.has_any_role(*ROLES_CAN_CONTROL_BOT)
+@commands.has_any_role(*config.ROLES_CAN_CONTROL_BOT)
 @bot.command("help")
 async def help(ctx):
     widget = Embed(description="Available commands for Invite-Role-Bot", color=0x03D692, title="Help")
-    widget.set_thumbnail(url="https://eco-bots.s3.eu-north-1.amazonaws.com/eco_large.png")
+    widget.set_thumbnail(url=config.PROJECT_THUMBNAIL)
     widget.add_field(name="$invites.stats_all", value="`Displays a list of all invite URLs`\n", inline=False)
     widget.add_field(
         name="$invites.stats_used", value="`Lists invite URLs which were used at least once`", inline=False

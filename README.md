@@ -1,4 +1,4 @@
-# EcoInviteRoleBot
+# InviteRoleBot
 
 A bot that can automatically assign roles based on what invite URL was used
 
