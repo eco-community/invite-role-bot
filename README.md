@@ -1,6 +1,8 @@
 # InviteRoleBot
 
-A bot that can automatically assign roles based on what invite URL was used
+A Discord bot that can automatically assign roles based on what invite URL was used
+
+**For more on this bot and all the rest of the Eco Community bots, check out [this post](https://echo.mirror.xyz/GlFuqSbTZOLDl0LA7eDa0Yibhqq6IHNUC48nd3WJZQw).**
 
 # Bot can:
 * Detect which user joined via which invite link
